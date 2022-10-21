@@ -2,17 +2,24 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DamageObject : MonoBehaviour
+public class DamageObject: MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    public GameObject owner;
+    public int damage;
+    public bool destroyOnHit;
 
-    // Update is called once per frame
-    void Update()
+    private void OnCollisionEnter2D(Collision2D collision)
     {
-        
+        BaseCreature creature = collision.gameObject.GetComponent<BaseCreature>();
+        if (creature != null && owner != creature.gameObject)
+        {
+            creature.Damage(damage);
+            if (creature.getCurrentHP() == 0)
+                creature.OnDeath();
+        }
+
+        if (destroyOnHit)
+            GameObject.Destroy(gameObject);
+
     }
 }

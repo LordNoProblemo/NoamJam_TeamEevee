@@ -7,33 +7,50 @@ public abstract class BaseCreature : MonoBehaviour
     public Rigidbody2D rb;
     public int maxHP;
     protected int currentHP;
-    private bool onGround = false;
     public int jumpPower, speed;
+    private bool onGround = false;
     // Start is called before the first frame update
     void Start()
     {
         currentHP = maxHP;
     }
 
-
-    protected void OnCollisionEnter2D(Collision2D collision)
+    public virtual void OnDeath()
     {
-     //   if (collision.gameObject.tag == "Ground")
-            if (collision.gameObject.transform.localPosition.y < gameObject.transform.localPosition.y)
-                onGround = true;
+        GameObject.Destroy(gameObject);
     }
 
-    protected void OnCollisionExit2D(Collision2D collision)
+    public void Heal(int amount)
     {
-        //if (collision.gameObject.tag == "Ground")
-            if (collision.gameObject.transform.localPosition.y < gameObject.transform.localPosition.y)
-                onGround = false;
+        currentHP = Mathf.Min(maxHP, currentHP + amount);
+    }
+
+    public void Damage(int amount)
+    {
+        currentHP = Mathf.Max(0, currentHP - amount);
+    }
+
+    public int getCurrentHP()
+    {
+        return currentHP;
+    }
+
+    protected virtual void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.transform.localPosition.y < gameObject.transform.localPosition.y)
+            onGround = true;
+    }
+
+    protected virtual void OnCollisionExit2D(Collision2D collision)
+    {
+        if (collision.gameObject.transform.localPosition.y < gameObject.transform.localPosition.y)
+            onGround = false;
     }
 
     protected void Jump()
     {
         if (onGround)
-            rb.AddForce(new Vector2(0, 10 * jumpPower));
+            rb.AddForce(new Vector2(0, jumpPower));
     }
 
     protected void MoveRight() 
