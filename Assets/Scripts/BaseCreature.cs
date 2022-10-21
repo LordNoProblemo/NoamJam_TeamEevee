@@ -18,18 +18,14 @@ public abstract class BaseCreature : MonoBehaviour
 
     protected void OnCollisionEnter2D(Collision2D collision)
     {
-        Debug.Log("Meow");
-        if (collision.gameObject.tag == "Ground")
-        {
-            Debug.Log("Meowy");
+     //   if (collision.gameObject.tag == "Ground")
             if (collision.gameObject.transform.localPosition.y < gameObject.transform.localPosition.y)
                 onGround = true;
-        }
     }
 
     protected void OnCollisionExit2D(Collision2D collision)
     {
-        if (collision.gameObject.tag == "Ground")
+        //if (collision.gameObject.tag == "Ground")
             if (collision.gameObject.transform.localPosition.y < gameObject.transform.localPosition.y)
                 onGround = false;
     }
