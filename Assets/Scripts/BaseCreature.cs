@@ -9,6 +9,9 @@ public abstract class BaseCreature : MonoBehaviour
     protected int currentHP;
     public int jumpPower, speed;
     private bool onGround = false;
+    private GameObject lastGround;
+    public bool isLookingRight;
+    
     // Start is called before the first frame update
     void Start()
     {
@@ -37,30 +40,44 @@ public abstract class BaseCreature : MonoBehaviour
 
     protected virtual void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.transform.localPosition.y < gameObject.transform.localPosition.y)
-            onGround = true;
+        foreach (ContactPoint2D pnt in collision.contacts)
+            if (pnt.normal.y > 0)
+            {
+                onGround = true;
+                lastGround = collision.gameObject;
+                return;
+            }
     }
 
     protected virtual void OnCollisionExit2D(Collision2D collision)
     {
-        if (collision.gameObject.transform.localPosition.y < gameObject.transform.localPosition.y)
+        if (collision.gameObject == lastGround)
+        {
             onGround = false;
+            lastGround = null;
+        }    
     }
 
     protected void Jump()
     {
-        if (onGround)
-            rb.AddForce(new Vector2(0, jumpPower));
+        if (onGround) {
+            Debug.Log("Jump");
+            onGround = false;
+            lastGround = null;
+            rb.AddForce(new Vector2(0, jumpPower), ForceMode2D.Impulse);
+        }
     }
 
     protected void MoveRight() 
     {
         rb.velocity = new Vector2(speed, rb.velocity.y);
+        isLookingRight = true;
     }
 
     protected void MoveLeft()
     {
         rb.velocity = new Vector2(-speed, rb.velocity.y);
+        isLookingRight = false;
     }
 
     protected void StopMovement()
