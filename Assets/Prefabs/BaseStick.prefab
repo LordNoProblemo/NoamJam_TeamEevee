@@ -125,7 +125,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   owner: {fileID: 0}
-  damage: 1
+  damage: 5
   damageDelay: 0
   destroyOnHit: 0
   delay: 0.3

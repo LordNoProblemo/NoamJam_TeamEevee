@@ -234,7 +234,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rb: {fileID: 8585819725335975739}
-  maxHP: 5
+  maxHP: 10
   jumpPower: 5
   speed: 2
   isLookingRight: 0
@@ -280,7 +280,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   owner: {fileID: 8585819725335975743}
-  damage: 2
+  damage: 1
   damageDelay: 2
   destroyOnHit: 0
 --- !u!114 &1888428487
