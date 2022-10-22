@@ -101,4 +101,14 @@ public abstract class BaseCreature : MonoBehaviour
     {
         Move();
     }
+
+
+    protected void Bump()
+    {
+        if (isLookingRight)
+            MoveLeft();
+        else
+            MoveRight();
+        Jump();
+    }
 }

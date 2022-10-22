@@ -13,11 +13,7 @@ public class FollowingEnemy : BaseCreature
             return;
         if (contacted_player)
         {
-            if (isLookingRight)
-                MoveLeft();
-            else
-                MoveRight();
-            Jump();
+            Bump();
             return;
         }
         else if (player.transform.localPosition.x > transform.localPosition.x)
