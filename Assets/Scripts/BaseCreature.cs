@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public abstract class BaseCreature : MonoBehaviour
 {
@@ -23,7 +24,7 @@ public abstract class BaseCreature : MonoBehaviour
     protected GameObject weapon;
     [SerializeField] float projectileDelay = 0.3f, meleeCooldown = 0.1f, damageCooldown=0.3f;
     bool isAttacking, isDamaged;
-    float lastHit = -Mathf.Infinity;
+    [SerializeField] bool reloadAfterDeath = false;
 
     // Start is called before the first frame update
     protected virtual void Start()
@@ -48,7 +49,8 @@ public abstract class BaseCreature : MonoBehaviour
     {
         yield return new WaitForSeconds(destroyOnDelay);
         GameObject.Destroy(gameObject);
-
+        if (reloadAfterDeath)
+            SceneManager.LoadScene("SampleScene");
     }
 
     public void Heal(int amount)
@@ -59,18 +61,22 @@ public abstract class BaseCreature : MonoBehaviour
     public void Damage(int amount)
     {
         currentHP = Mathf.Max(0, currentHP - amount);
-        isDamaged = true;
-        lastHit = Time.time;
         if (idleAnimation != null)
-            try
-            {
-                idleAnimation.Play(gameObject.tag + "_Hit_Anim");
-            }
-            catch { }
-              //  StartCoroutine(TakingDamage());
+            StartCoroutine(TakingDamage());
     }
 
-  
+    IEnumerator TakingDamage()
+    {
+        isDamaged = true;
+        try
+        {
+            idleAnimation.Play(gameObject.tag + "_Hit_Anim");
+        }
+        catch { }
+        yield return new WaitForSeconds(damageCooldown);
+        isDamaged = false;
+    }
+
     public int getCurrentHP()
     {
         return currentHP;
@@ -105,7 +111,7 @@ public abstract class BaseCreature : MonoBehaviour
         }    
     }
 
-    protected void Jump()
+    protected virtual void Jump()
     {
         if (onGround && !isJumping) {
             isJumping = true;
@@ -140,7 +146,7 @@ public abstract class BaseCreature : MonoBehaviour
         rb.velocity = new Vector2(0, rb.velocity.y);
     }
 
-    protected void Bump()
+    protected virtual void Bump()
     {
         if (isLookingRight)
             MoveLeft();
@@ -189,7 +195,7 @@ public abstract class BaseCreature : MonoBehaviour
             return;
         weapon = GameObject.Instantiate(weaponPrefab, WeaponSpawn(), Quaternion.identity);
         weapon.GetComponent<MeleeWeapon>().SetOwner(gameObject);
-        weapon.SetActive(true);
+        weapon.GetComponent<MeleeWeapon>().Activate();
         isAttacking = true;
 
         if (idleAnimation != null)
@@ -203,7 +209,6 @@ public abstract class BaseCreature : MonoBehaviour
     IEnumerator destroyWeapon()
     {
         yield return new WaitForSeconds(weaponPrefab.GetComponent<MeleeWeapon>().delay);
-        GameObject.Destroy(weapon);
         weapon = null;
         isAttacking = false;
 
@@ -233,7 +238,5 @@ public abstract class BaseCreature : MonoBehaviour
         Move();
         HandleAnimationDirection();
         HandleWeaponLocation();
-        if (isDamaged && Time.time - lastHit > damageCooldown)
-            isDamaged = false;
     }
 }
