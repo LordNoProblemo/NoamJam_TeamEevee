@@ -9,6 +9,7 @@ TagManager:
   - Shield
   - Weapon
   - Blob
+  - Eye
   layers:
   - Default
   - TransparentFX

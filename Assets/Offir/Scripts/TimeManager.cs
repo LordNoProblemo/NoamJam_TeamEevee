@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System;
 using IACFPSController.Managers;
+using UnityEngine.SceneManagement;
 
 namespace IACFPSController.Managers
 {
@@ -58,10 +59,13 @@ namespace IACFPSController.Managers
         {
             if (gameOver)
             {
+                if (Input.GetKey(KeyCode.Escape))
+                    SceneManager.LoadScene("SampleScene");
+
                 return;
             }
 
-            timeLeft -= Time.deltaTime;
+            timeLeft += Time.deltaTime;
 
             if (timeLeft <= 0)
             {

@@ -25,6 +25,8 @@ public abstract class BaseCreature : MonoBehaviour
     [SerializeField] float projectileDelay = 0.3f, meleeCooldown = 0.1f, damageCooldown=0.3f;
     bool isAttacking, isDamaged;
     [SerializeField] bool reloadAfterDeath = false;
+    [SerializeField] IACFPSController.Managers.TimeManager timeManager;
+    [SerializeField] GameObject getGood;
 
     // Start is called before the first frame update
     protected virtual void Start()
@@ -50,7 +52,10 @@ public abstract class BaseCreature : MonoBehaviour
         yield return new WaitForSeconds(destroyOnDelay);
         GameObject.Destroy(gameObject);
         if (reloadAfterDeath)
-            SceneManager.LoadScene("SampleScene");
+        {
+            timeManager.GameOver();
+            getGood.SetActive(true);
+        }
     }
 
     public void Heal(int amount)
