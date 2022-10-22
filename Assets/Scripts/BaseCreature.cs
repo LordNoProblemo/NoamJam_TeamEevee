@@ -13,6 +13,7 @@ public abstract class BaseCreature : MonoBehaviour
     public bool isLookingRight;
     protected bool isJumping;
     float lastJumpTime = -Mathf.Infinity;
+    [SerializeField] private Animator idleAnimation;
     
     // Start is called before the first frame update
     void Start()
@@ -94,14 +95,6 @@ public abstract class BaseCreature : MonoBehaviour
     {
         rb.velocity = new Vector2(0, rb.velocity.y);
     }
-    protected abstract void Move();
-    
-    // Update is called once per frame
-    void FixedUpdate()
-    {
-        Move();
-    }
-
 
     protected void Bump()
     {
@@ -111,4 +104,25 @@ public abstract class BaseCreature : MonoBehaviour
             MoveRight();
         Jump();
     }
+    protected abstract void Move();
+    
+
+    protected void HandleAnimationDirection()
+    {
+        if (idleAnimation == null)
+            return;
+        foreach (SpriteRenderer sp in idleAnimation.GetComponentsInChildren<SpriteRenderer>(true))
+        {
+            sp.flipX = isLookingRight;
+        }
+    }
+    // Update is called once per frame
+    void FixedUpdate()
+    {
+        Move();
+        HandleAnimationDirection();
+    }
+
+
+   
 }
