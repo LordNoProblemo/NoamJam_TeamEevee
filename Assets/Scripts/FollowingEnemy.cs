@@ -17,9 +17,9 @@ public class FollowingEnemy : BaseCreature
             contacted_damage = false;
             return;
         }
-        else if (player.transform.localPosition.x > transform.localPosition.x)
+        else if (player.transform.localPosition.x > transform.localPosition.x + 0.01)
             MoveRight();
-        else if (player.transform.localPosition.x < transform.localPosition.x)
+        else if (player.transform.localPosition.x < transform.localPosition.x - 0.01)
             MoveLeft();
         else
             StopMovement();

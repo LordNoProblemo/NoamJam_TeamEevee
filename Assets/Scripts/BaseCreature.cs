@@ -16,23 +16,39 @@ public abstract class BaseCreature : MonoBehaviour
     float lastPushed = -Mathf.Infinity;
     float lastProjectileShot = -Mathf.Infinity;
     float lastAttack = -Mathf.Infinity;
-    [SerializeField] private Animator idleAnimation;
+    [SerializeField] protected Animator idleAnimation;
     [SerializeField] GameObject projectilePrefab;
     [SerializeField] protected GameObject weaponPrefab;
+    [SerializeField] protected float destroyOnDelay = 0.0f;
     protected GameObject weapon;
-    [SerializeField] float projectileDelay = 0.3f, meleeCooldown = 0.1f;
+    [SerializeField] float projectileDelay = 0.3f, meleeCooldown = 0.1f, damageCooldown=0.3f;
+    bool isAttacking, isDamaged;
+    float lastHit = -Mathf.Infinity;
 
     // Start is called before the first frame update
-    void Start()
+    protected virtual void Start()
     {
         currentHP = maxHP;
         if (weapon != null)
             weapon.SetActive(false);
+        if (idleAnimation != null)
+            idleAnimation.Play(gameObject.tag + "_Idle_Anim");
+        isAttacking = false;
+        isDamaged = false;
     }
 
     public virtual void OnDeath()
     {
+        if (idleAnimation != null)
+            idleAnimation.Play(gameObject.tag + "_Death_Anim");
+        StartCoroutine(DestroyOnDeath());
+    }
+
+    IEnumerator DestroyOnDeath()
+    {
+        yield return new WaitForSeconds(destroyOnDelay);
         GameObject.Destroy(gameObject);
+
     }
 
     public void Heal(int amount)
@@ -43,8 +59,18 @@ public abstract class BaseCreature : MonoBehaviour
     public void Damage(int amount)
     {
         currentHP = Mathf.Max(0, currentHP - amount);
+        isDamaged = true;
+        lastHit = Time.time;
+        if (idleAnimation != null)
+            try
+            {
+                idleAnimation.Play(gameObject.tag + "_Hit_Anim");
+            }
+            catch { }
+              //  StartCoroutine(TakingDamage());
     }
 
+  
     public int getCurrentHP()
     {
         return currentHP;
@@ -85,6 +111,8 @@ public abstract class BaseCreature : MonoBehaviour
             isJumping = true;
             lastJumpTime = Time.time;
             rb.AddForce(new Vector2(0, jumpPower), ForceMode2D.Impulse);
+            if (idleAnimation != null && !isAttacking && !isDamaged)
+                idleAnimation.Play(gameObject.tag + "_Jump_Anim");
             // do animation
         }
     }
@@ -93,6 +121,8 @@ public abstract class BaseCreature : MonoBehaviour
     {
         rb.velocity = new Vector2(speed, rb.velocity.y);
         isLookingRight = true;
+        if (idleAnimation != null && !isAttacking && onGround && !isDamaged)
+            idleAnimation.Play(gameObject.tag + "_Walking_Anim");
         // do animation
     }
 
@@ -100,13 +130,14 @@ public abstract class BaseCreature : MonoBehaviour
     {
         rb.velocity = new Vector2(-speed, rb.velocity.y);
         isLookingRight = false;
+        if (idleAnimation != null && !isAttacking && onGround && !isDamaged)
+            idleAnimation.Play(gameObject.tag + "_Walking_Anim");
         // do animation
     }
 
     protected void StopMovement()
     {
         rb.velocity = new Vector2(0, rb.velocity.y);
-        // do animation
     }
 
     protected void Bump()
@@ -156,9 +187,13 @@ public abstract class BaseCreature : MonoBehaviour
     {
         if (Time.time - lastAttack < weaponPrefab.GetComponent<MeleeWeapon>().delay + meleeCooldown)
             return;
-        weapon = GameObject.Instantiate(weaponPrefab);
+        weapon = GameObject.Instantiate(weaponPrefab, WeaponSpawn(), Quaternion.identity);
         weapon.GetComponent<MeleeWeapon>().SetOwner(gameObject);
         weapon.SetActive(true);
+        isAttacking = true;
+
+        if (idleAnimation != null)
+            idleAnimation.Play(gameObject.tag + "_Attack_Anim");
 
         // do animation
         lastAttack = Time.time;
@@ -170,19 +205,26 @@ public abstract class BaseCreature : MonoBehaviour
         yield return new WaitForSeconds(weaponPrefab.GetComponent<MeleeWeapon>().delay);
         GameObject.Destroy(weapon);
         weapon = null;
+        isAttacking = false;
 
     }
-    void HandleWeaponLocation()
+
+    Vector2 WeaponSpawn()
     {
-        if (weapon == null)
-            return;
         Vector2 weaponSpawn = gameObject.transform.position;
         if (isLookingRight)
             weaponSpawn += 1.1f * Vector2.right;
         else
             weaponSpawn += 1.1f * Vector2.left;
+        return weaponSpawn;
+    }
+    void HandleWeaponLocation()
+    {
+        if (weapon == null)
+            return;
+        
 
-        weapon.transform.position = weaponSpawn;
+        weapon.transform.position = WeaponSpawn();
     }
 
     // Update is called once per frame
@@ -191,5 +233,7 @@ public abstract class BaseCreature : MonoBehaviour
         Move();
         HandleAnimationDirection();
         HandleWeaponLocation();
+        if (isDamaged && Time.time - lastHit > damageCooldown)
+            isDamaged = false;
     }
 }

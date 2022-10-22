@@ -56,6 +56,7 @@ MonoBehaviour:
   idleAnimation: {fileID: 6327315711460623693}
   projectilePrefab: {fileID: 1891289477686847740, guid: 3c43c8546d3f88340922d3b24ce271f0, type: 3}
   weaponPrefab: {fileID: 7211628967695044709, guid: 6f07340bc15cd834c8d63bd18e1dc059, type: 3}
+  destroyOnDeath: 0
   projectileDelay: 0.3
   meleeCooldown: 0.2
   shield: {fileID: 202648365623070662}

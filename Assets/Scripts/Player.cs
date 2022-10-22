@@ -8,9 +8,10 @@ public class Player : BaseCreature
     [SerializeField] float shieldActiveTime=2.0f, shieldCooldown=5.0f;
     float nextShieldAvailableTime = -Mathf.Infinity;
     // Start is called before the first frame update
-    private void Start()
+    protected override void Start()
     {
-        currentHP = PlayerPrefs.GetInt("currentHP", maxHP);
+        base.Start();
+
     }
     protected override void Move()
     {
