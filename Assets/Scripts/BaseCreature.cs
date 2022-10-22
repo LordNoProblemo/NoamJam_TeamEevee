@@ -8,9 +8,11 @@ public abstract class BaseCreature : MonoBehaviour
     public int maxHP;
     protected int currentHP;
     public int jumpPower, speed;
-    private bool onGround = false;
+    protected bool onGround = false;
     private GameObject lastGround;
     public bool isLookingRight;
+    protected bool isJumping;
+    float lastJumpTime = -Mathf.Infinity;
     
     // Start is called before the first frame update
     void Start()
@@ -44,9 +46,18 @@ public abstract class BaseCreature : MonoBehaviour
             if (pnt.normal.y > 0)
             {
                 onGround = true;
+                isJumping = false;
                 lastGround = collision.gameObject;
                 return;
             }
+    }
+
+    private void OnCollisionStay2D(Collision2D collision)
+    {
+        if (collision.gameObject == lastGround)
+            onGround = true;
+        if (isJumping && rb.velocity.y == 0 && lastJumpTime + 1 < Time.time)
+            isJumping = false;
     }
 
     protected virtual void OnCollisionExit2D(Collision2D collision)
@@ -60,10 +71,9 @@ public abstract class BaseCreature : MonoBehaviour
 
     protected void Jump()
     {
-        if (onGround) {
-            Debug.Log("Jump");
-            onGround = false;
-            lastGround = null;
+        if (onGround && !isJumping) {
+            isJumping = true;
+            lastJumpTime = Time.time;
             rb.AddForce(new Vector2(0, jumpPower), ForceMode2D.Impulse);
         }
     }

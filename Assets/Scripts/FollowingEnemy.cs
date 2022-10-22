@@ -5,13 +5,21 @@ using UnityEngine;
 public class FollowingEnemy : BaseCreature
 {
     bool contacted_player = false;
+
     protected override void Move()
     {
         GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player == null)
+        if (player == null || isJumping)
             return;
         if (contacted_player)
-            StopMovement();
+        {
+            if (isLookingRight)
+                MoveLeft();
+            else
+                MoveRight();
+            Jump();
+            return;
+        }
         else if (player.transform.localPosition.x > transform.localPosition.x)
             MoveRight();
         else if (player.transform.localPosition.x < transform.localPosition.x)
