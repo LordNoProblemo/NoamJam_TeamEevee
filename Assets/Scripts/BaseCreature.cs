@@ -13,12 +13,20 @@ public abstract class BaseCreature : MonoBehaviour
     public bool isLookingRight;
     protected bool isJumping;
     float lastJumpTime = -Mathf.Infinity;
+    float lastPushed = -Mathf.Infinity;
+    float lastProjectileShot = -Mathf.Infinity;
+    float lastAttack = -Mathf.Infinity;
     [SerializeField] private Animator idleAnimation;
-    
+    [SerializeField] GameObject projectilePrefab;
+    [SerializeField] protected GameObject weapon;
+    [SerializeField] float projectileDelay = 0.3f, meleeCooldown = 0.1f;
+
     // Start is called before the first frame update
     void Start()
     {
         currentHP = maxHP;
+        if (weapon != null)
+            weapon.SetActive(false);
     }
 
     public virtual void OnDeath()
@@ -34,6 +42,7 @@ public abstract class BaseCreature : MonoBehaviour
     public void Damage(int amount)
     {
         currentHP = Mathf.Max(0, currentHP - amount);
+        Debug.Log("[" + gameObject.name + "] " + currentHP + "/" + maxHP);
     }
 
     public int getCurrentHP()
@@ -76,6 +85,7 @@ public abstract class BaseCreature : MonoBehaviour
             isJumping = true;
             lastJumpTime = Time.time;
             rb.AddForce(new Vector2(0, jumpPower), ForceMode2D.Impulse);
+            // do animation
         }
     }
 
@@ -83,17 +93,20 @@ public abstract class BaseCreature : MonoBehaviour
     {
         rb.velocity = new Vector2(speed, rb.velocity.y);
         isLookingRight = true;
+        // do animation
     }
 
     protected void MoveLeft()
     {
         rb.velocity = new Vector2(-speed, rb.velocity.y);
         isLookingRight = false;
+        // do animation
     }
 
     protected void StopMovement()
     {
         rb.velocity = new Vector2(0, rb.velocity.y);
+        // do animation
     }
 
     protected void Bump()
@@ -104,8 +117,13 @@ public abstract class BaseCreature : MonoBehaviour
             MoveRight();
         Jump();
     }
-    protected abstract void Move();
     
+    public void Push(Vector2 velocity)
+    {
+        rb.velocity = velocity;
+        lastPushed = Time.time;
+    }
+    protected abstract void Move();
 
     protected void HandleAnimationDirection()
     {
@@ -116,13 +134,50 @@ public abstract class BaseCreature : MonoBehaviour
             sp.flipX = isLookingRight;
         }
     }
+
+    protected void ShootProjectile()
+    {
+        if (Time.time - lastProjectileShot < projectileDelay)
+            return;
+        // do animation
+        Vector2 projectileSpawn = gameObject.transform.position;
+        if (isLookingRight)
+            projectileSpawn += Vector2.right;
+        else
+            projectileSpawn += Vector2.left;
+        GameObject projectileObject = GameObject.Instantiate(projectilePrefab, projectileSpawn, Quaternion.identity);
+        Projectile projectile = projectileObject.GetComponent<Projectile>();
+        projectile.SetOwner(gameObject);
+        projectile.SetDirection(isLookingRight);
+        lastProjectileShot = Time.time;
+    }
+
+    protected void Attack()
+    {
+        if (Time.time - lastAttack < weapon.GetComponent<MeleeWeapon>().delay + meleeCooldown)
+            return;
+        weapon.GetComponent<MeleeWeapon>().Activate();
+        // do animation
+        lastAttack = Time.time;
+    }
+    void HandleWeaponLocation()
+    {
+        if (weapon == null)
+            return;
+        Vector2 weaponSpawn = gameObject.transform.position;
+        if (isLookingRight)
+            weaponSpawn += Vector2.right;
+        else
+            weaponSpawn += Vector2.left;
+
+        weapon.transform.position = weaponSpawn;
+    }
+
     // Update is called once per frame
-    void FixedUpdate()
+    protected virtual void FixedUpdate()
     {
         Move();
         HandleAnimationDirection();
+        HandleWeaponLocation();
     }
-
-
-   
 }

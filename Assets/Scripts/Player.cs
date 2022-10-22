@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Player : BaseCreature
 {
+    bool inAttack;
     // Start is called before the first frame update
     private void Start()
     {
@@ -21,7 +22,12 @@ public class Player : BaseCreature
         if (Input.GetKey(KeyCode.Space))
             Jump();
     }
-    
-    // Update is called once per frame
-    
+  
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.A) && !weapon.activeSelf)
+            Attack();
+        if (Input.GetKeyDown(KeyCode.S))
+            ShootProjectile();
+    }
 }

@@ -4,11 +4,11 @@ using UnityEngine;
 
 public class DamageObject: MonoBehaviour
 {
-    public GameObject owner;
-    public int damage;
-    public bool destroyOnHit;
+    [SerializeField] protected GameObject owner;
+    [SerializeField] int damage;
+    [SerializeField] float damageDelay;
+    [SerializeField] protected bool destroyOnHit;
     float lastHitTime;
-    public float damageDelay;
 
     private void Start()
     {
@@ -31,16 +31,14 @@ public class DamageObject: MonoBehaviour
     {
 
         DoDamage(collision);
-        if (destroyOnHit)
+        if (destroyOnHit && collision.gameObject != owner)
             GameObject.Destroy(gameObject);
 
     }
 
-    private void OnCollisionStay2D(Collision2D collision)
+    public void SetOwner(GameObject newOwner)
     {
-        Debug.Log("MEOWY");
-        DoDamage(collision);
+        owner = newOwner;
     }
-
     
 }
