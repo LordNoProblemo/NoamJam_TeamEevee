@@ -18,7 +18,8 @@ public abstract class BaseCreature : MonoBehaviour
     float lastAttack = -Mathf.Infinity;
     [SerializeField] private Animator idleAnimation;
     [SerializeField] GameObject projectilePrefab;
-    [SerializeField] protected GameObject weapon;
+    [SerializeField] protected GameObject weaponPrefab;
+    protected GameObject weapon;
     [SerializeField] float projectileDelay = 0.3f, meleeCooldown = 0.1f;
 
     // Start is called before the first frame update
@@ -42,7 +43,6 @@ public abstract class BaseCreature : MonoBehaviour
     public void Damage(int amount)
     {
         currentHP = Mathf.Max(0, currentHP - amount);
-        Debug.Log("[" + gameObject.name + "] " + currentHP + "/" + maxHP);
     }
 
     public int getCurrentHP()
@@ -154,11 +154,23 @@ public abstract class BaseCreature : MonoBehaviour
 
     protected void Attack()
     {
-        if (Time.time - lastAttack < weapon.GetComponent<MeleeWeapon>().delay + meleeCooldown)
+        if (Time.time - lastAttack < weaponPrefab.GetComponent<MeleeWeapon>().delay + meleeCooldown)
             return;
-        weapon.GetComponent<MeleeWeapon>().Activate();
+        weapon = GameObject.Instantiate(weaponPrefab);
+        weapon.GetComponent<MeleeWeapon>().SetOwner(gameObject);
+        weapon.SetActive(true);
+
         // do animation
         lastAttack = Time.time;
+        StartCoroutine(destroyWeapon());
+    }
+
+    IEnumerator destroyWeapon()
+    {
+        yield return new WaitForSeconds(weaponPrefab.GetComponent<MeleeWeapon>().delay);
+        GameObject.Destroy(weapon);
+        weapon = null;
+
     }
     void HandleWeaponLocation()
     {
@@ -166,9 +178,9 @@ public abstract class BaseCreature : MonoBehaviour
             return;
         Vector2 weaponSpawn = gameObject.transform.position;
         if (isLookingRight)
-            weaponSpawn += Vector2.right;
+            weaponSpawn += 1.1f * Vector2.right;
         else
-            weaponSpawn += Vector2.left;
+            weaponSpawn += 1.1f * Vector2.left;
 
         weapon.transform.position = weaponSpawn;
     }

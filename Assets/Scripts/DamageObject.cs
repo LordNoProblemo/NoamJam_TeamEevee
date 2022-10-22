@@ -18,10 +18,10 @@ public class DamageObject: MonoBehaviour
     private void DoDamage(Collision2D collision)
     {
         BaseCreature creature = collision.gameObject.GetComponent<BaseCreature>();
-
         if (creature != null && owner != creature.gameObject && Time.time - lastHitTime > damageDelay)
         {   
-            creature.Damage(damage);
+            if (collision.gameObject != GameObject.FindGameObjectWithTag("Player") || !collision.gameObject.GetComponent<Player>().Shielded())
+                creature.Damage(damage);
             if (creature.getCurrentHP() == 0)
                 creature.OnDeath();
             lastHitTime = Time.time;
@@ -29,7 +29,6 @@ public class DamageObject: MonoBehaviour
     }
     private void OnCollisionEnter2D(Collision2D collision)
     {
-
         DoDamage(collision);
         if (destroyOnHit && collision.gameObject != owner)
             GameObject.Destroy(gameObject);
